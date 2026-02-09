@@ -22,10 +22,18 @@ env:
   LOCATION: westeurope
 
 jobs:
-  validate:
+   validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Verify Secrets
+        run: |
+          if [ -z "${{ secrets.AZURE_CLIENT_ID }}" ]; then
+            echo "Error: AZURE_CLIENT_ID secret is not set"
+            exit 1
+          fi
+          echo "Secrets validated successfully"
       
       - name: Azure Login
         uses: azure/login@v2
@@ -40,8 +48,7 @@ jobs:
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
             --template-file infrastructure/main.bicep \
             --parameters infrastructure/parameters.dev.json
-
-  deploy:
+   deploy:
     needs: validate
     runs-on: ubuntu-latest
     steps:
